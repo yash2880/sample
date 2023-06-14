@@ -46,9 +46,12 @@ pipeline {
     stage('Choose Deployment Type') {
       steps {
         script {
-          def deploymentChoice = input(message: 'Choose deployment type', parameters: [
-            [$class: 'ChoiceParameterDefinition', choices: ['Kubernetes', 'Docker Compose'], description: 'Deployment Type', name: 'deploymentType']
-          ])
+          def deploymentChoice = input(
+            message: 'Choose deployment type',
+            parameters: [
+              choice(choices: ['Kubernetes', 'Docker Compose'], description: 'Deployment Type', name: 'deploymentType')
+            ]
+          )
 
           if (deploymentChoice == 'Kubernetes') {
             stage('Create Kubernetes Deployment') {
@@ -89,7 +92,7 @@ pipeline {
           } else if (deploymentChoice == 'Docker Compose') {
             stage('Deploy with Docker Compose') {
               steps {
-                dir('node-App') {
+                dir('node-app') {
                   sh 'sudo docker stack deploy -c docker-compose.yml myapp'
                 }
               }
