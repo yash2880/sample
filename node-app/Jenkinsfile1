@@ -7,7 +7,7 @@ pipeline {
         git branch: 'main', url: 'https://github.com/yash2880/sample.git'
       }
     }
-    
+
     stage('Show branch name') {
       steps {
         script {
@@ -16,7 +16,7 @@ pipeline {
         }
       }
     }
-      
+
     stage('Build Docker image') {
       steps {
         dir('node-app') {
@@ -89,7 +89,7 @@ pipeline {
           } else if (deploymentChoice == 'Docker Compose') {
             stage('Deploy with Docker Compose') {
               steps {
-                dir('node-app') {
+                dir('node-App') {
                   sh 'sudo docker stack deploy -c docker-compose.yml myapp'
                 }
               }
