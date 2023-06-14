@@ -52,10 +52,12 @@ pipeline {
         expression { params.DEPLOYMENT_TYPE == 'Docker-Compose' }
       }
       steps {
-        sh 'sudo docker stack deploy -c docker-compose.yml myapp'
+        dir('node-app') {
+          sh 'sudo docker stack deploy -c docker-compose.yml myapp'
+        }
       }
     }
-    
+
     stage('Create Kubernetes Deployment') {
       when {
         expression { params.DEPLOYMENT_TYPE == 'Kubernetes' }
@@ -77,7 +79,7 @@ pipeline {
         }
       }
     }
-	
+
     stage('Create Kubernetes Service') {
       when {
         expression { params.DEPLOYMENT_TYPE == 'Kubernetes' }
