@@ -43,41 +43,51 @@ pipeline {
       }
     }
 
-    stage('Choose Deployment Type') {
+    // New stages added below
+
+    stage('Create Docker-compose') {
+      when {
+        expression { params.STAGE == 'Docker-Compose' }
+      }
       steps {
-        script {
-          def deploymentChoice = input(
-            message: 'Choose deployment type',
-            parameters: [
-              choice(name: 'STAGE', choices: ['Kubernetes', 'Docker-Compose'], description: '')
-            ]
-          )
+        sh 'sudo docker stack deploy -c docker-compose.yml myapp'
+      }
+    }
+    
+    stage('Create Kubernetes Deployment') {
+      steps {
+        dir('node-app') {
+          script {
+            def deployCmd = "sudo kubectl apply -f k8-deployment.yml"
+            def deployStatus = sh(script: deployCmd, returnStatus: true)
 
-          if (deploymentChoice == 'Kubernetes') {
-            stage('Create Kubernetes Service') {
-              steps {
-                dir('node-app') {
-                  script {
-                    def serviceCmd = "sudo kubectl apply -f k8-service.yml"
-                    def serviceStatus = sh(script: serviceCmd, returnStatus: true)
+            if (deployStatus == 0) {
+              echo "Kubernetes deployment succeeded"
+              currentBuild.result = 'SUCCESS'
+            } else {
+              echo "Kubernetes deployment failed"
+              currentBuild.result = 'FAILURE'
+            }
+          }
+        }
+      }
+    }
+	
+    stage('Create Kubernetes Service') {
+      when {
+        expression { params.STAGE == 'Kubernetes' }
+      }
+      steps {
+        dir('node-app') {
+          script {
+            def serviceCmd = "sudo kubectl apply -f k8-service.yml"
+            def serviceStatus = sh(script: serviceCmd, returnStatus: true)
 
-                    if (serviceStatus == 0) {
-                      echo "Kubernetes service creation succeeded"
-                    } else {
-                      echo "Kubernetes service creation failed"
-                    }
-                  }
-                }
-              }
+            if (serviceStatus == 0) {
+              echo "Kubernetes service creation succeeded"
+            } else {
+              echo "Kubernetes service creation failed"
             }
-          } else if (deploymentChoice == 'Docker-Compose') {
-            stage('Create Docker-compose') {
-              steps {
-                sh 'sudo docker stack deploy -c docker-compose.yml myapp'
-              }
-            }
-          } else {
-            error "Invalid deployment type selected"
           }
         }
       }
