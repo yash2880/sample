@@ -1,6 +1,10 @@
 pipeline {
   agent any
 
+  parameters {
+    choice(name: 'DEPLOYMENT_TYPE', choices: ['Docker-Compose', 'Kubernetes'], description: 'Choose the deployment type')
+  }
+
   stages {
     stage('Clone repository') {
       steps {
@@ -43,11 +47,9 @@ pipeline {
       }
     }
 
-    // New stages added below
-
     stage('Create Docker-compose') {
       when {
-        expression { params.STAGE == 'Docker-Compose' }
+        expression { params.DEPLOYMENT_TYPE == 'Docker-Compose' }
       }
       steps {
         sh 'sudo docker stack deploy -c docker-compose.yml myapp'
@@ -55,6 +57,9 @@ pipeline {
     }
     
     stage('Create Kubernetes Deployment') {
+      when {
+        expression { params.DEPLOYMENT_TYPE == 'Kubernetes' }
+      }
       steps {
         dir('node-app') {
           script {
@@ -75,7 +80,7 @@ pipeline {
 	
     stage('Create Kubernetes Service') {
       when {
-        expression { params.STAGE == 'Kubernetes' }
+        expression { params.DEPLOYMENT_TYPE == 'Kubernetes' }
       }
       steps {
         dir('node-app') {
