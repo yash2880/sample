@@ -53,7 +53,7 @@ pipeline {
       }
       steps {
         dir('node-app') {
-          sh 'sudo docker stack deploy -c docker-compose.yml myapp'
+          sh 'sudo docker stack deploy -c docker-compose.yml my-node-app'
         }
       }
     }
