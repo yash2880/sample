@@ -89,7 +89,7 @@ pipeline {
           } else if (deploymentChoice == 'Docker Compose') {
             stage('Deploy with Docker Compose') {
               steps {
-                dir('node-App') {
+                dir('node-app') {
                   sh 'sudo docker stack deploy -c docker-compose.yml myapp'
                 }
               }
